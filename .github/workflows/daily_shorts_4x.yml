@@ -1,8 +1,7 @@
-name: Behind The Curtain — 4x Daily V15 Shorts
+name: Behind The Curtain — 4x Daily V20.5 CINEMA Shorts
 
 on:
   schedule:
-    # 4 US Prime Time slots every day (07:00, 11:00, 15:00, 19:00 US EST)
     - cron: '0 12,16,20,0 * * *'
   workflow_dispatch:
     inputs:
@@ -23,13 +22,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: btc-v15-shorts
+  group: btc-v20-shorts
   cancel-in-progress: false
 
 jobs:
-  publish-v15-short:
+  publish-v20-short:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -46,28 +45,29 @@ jobs:
           pip install -q --upgrade pip
           pip install -q -r requirements.txt
 
-      - name: Produce & Upload V15 BEAST Short (9:16)
+      - name: Produce & Upload V20.5 CINEMA BEAST Short (9:16)
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
           PRIVACY_STATUS: ${{ github.event.inputs.privacy || 'public' }}
         run: |
-          python3 run_daily_v15.py --topic "${{ github.event.inputs.topic || '' }}"
+          python3 run_daily_v20.py --topic "${{ github.event.inputs.topic || '' }}"
 
       - name: Save updated state (prevents duplicate topics)
         if: ${{ (github.event.inputs.dry_run || 'false') != 'true' }}
         run: |
-          git config user.name "V15 Beast Autopilot"
+          git config user.name "V20.5 Cinema Autopilot"
           git config user.email "autopilot@behindthecurtain.local"
           git add state/
           if ! git diff --staged --quiet; then
-            git commit -m "chore(btc): log published V15 Short [skip ci]"
+            git commit -m "chore(btc): log published V20.5 Cinema Short [skip ci]"
             git pull --rebase origin main || git pull --rebase origin master || true
             git push
           fi
