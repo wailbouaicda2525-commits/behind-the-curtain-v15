@@ -242,12 +242,12 @@ def _gather_wikipedia_article_videos(ev):
 
     # Also search Wikimedia Commons strictly for the exact topic phrase!
     exact_phrase = re.sub(r"\([^)]*\)", "", page_titles[0] if page_titles else "").strip()
-    if exact_phrase and len(exact_phrase) >= 4:
+       if exact_phrase and len(exact_phrase) >= 4:
+        srq = urllib.parse.quote('filetype:video "' + exact_phrase + '"')
         url = (
             "https://commons.wikimedia.org/w/api.php?action=query&list=search&srnamespace=6"
-            f"&srsearch={urllib.parse.quote('filetype:video \"' + exact_phrase + '\"')}&srlimit=5&format=json"
+            f"&srsearch={srq}&srlimit=5&format=json"
         )
-        try:
             hits = _http_json(url, timeout=14).get("query", {}).get("search", [])
             for h in hits:
                 ft = h.get("title", "")
