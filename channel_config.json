@@ -1,0 +1,13 @@
+{
+  "channel_name": "BEHIND THE CURTAIN",
+  "mode": "behind_the_curtain",
+  "voice": "en-GB-RyanNeural",
+  "voice_rate": "+2%",
+  "voice_pitch": "-2Hz",
+  "hashtags": "#Shorts #ColdWar #Declassified #SecretHistory #HistoryDocumentary #BehindTheCurtain #USHistory",
+  "description_footer": "Behind The Curtain uncovers declassified Cold War operations, CIA & KGB espionage files, nuclear close calls, and secret 20th-century history using real archival photography and 3D tactical cartography.\n\nSubscribe for a new declassified dossier every single day.",
+  "weekly_title_template": "7 Declassified Cold War Secrets You Were Never Told — Full Documentary ({week})",
+  "weekly_description_intro": "Every Sunday on Behind The Curtain, we compile 7 verified declassified Cold War operations, intelligence missions, and hidden historical turning points in full 1080p widescreen.",
+  "weekly_hashtags": "#ColdWar #HistoryDocumentary #Declassified #CIA #KGB #USHistory #BehindTheCurtain",
+  "weekly_tags": ["cold war documentary", "declassified files", "secret history", "cia operations", "kgb espionage", "us history documentary", "behind the curtain"]
+}
