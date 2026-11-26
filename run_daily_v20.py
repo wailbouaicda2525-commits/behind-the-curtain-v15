@@ -107,7 +107,7 @@ def main():
         print(f"[DRY RUN V20] Output MP4={args.out_mp4} | QA={args.qa_out}")
         return
 
-    vid = upload_video_to_youtube(args.out_mp4, yt_title, yt_desc, tags, privacy=privacy, category_id="27")
+    vid = upload_video_to_youtube(args.out_mp4, yt_title, yt_desc, tags, privacy=privacy)
     os.makedirs("state", exist_ok=True)
     hp = "state/history_log.json"
     hist = json.load(open(hp)) if os.path.exists(hp) else []
