@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "mode": "behind_the_curtain",
+    "id": "btc:project_azorian",
+    "month": 11,
+    "day": 26,
+    "year": 1974,
+    "topic_hint": "How the CIA Built a Secret Ship to Steal a Sunken Soviet Nuclear Submarine",
+    "date_label": "CLASSIFIED FILE \u2022 1974",
+    "location": "PACIFIC OCEAN",
+    "title": "How the CIA Built a Secret Ship to Steal a Sunken Soviet Nuclear",
+    "script": {
+      "title": "How the CIA Built a Secret Ship to Steal a Sunken Soviet Nuclear",
+      "newspaper_headline": "HOW THE CIA BUILT A SECRET SHIP TO STEAL A",
+      "thumb_hook": "SECRET OF 1974",
+      "narration": "In 1974, a classified operation unfolded that almost nobody was ever meant to hear about. Project Azorian was a U.S. Central Intelligence Agency project to recover the sunken Soviet submarine K-129 from the Pacific Ocean floor in 1974 using the purpose-built ship Hughes Glomar Explorer. The 1968 sinking of K-129 occurred about 1,560 miles northwest of Hawaii. Project Azorian was one of the most complex, expensive, and covert intelligence operations of the Cold War at a cost of about US$800 million. They worked with scientists to develop methods for preserving paper that had been underwater for years in hopes of being able to recover and read the submarine's codebooks. Follow Behind The Curtain for the next true story.",
+      "polaroid_caption": "FILE #1974-1126 \u2022 PACIFIC OCEAN",
+      "stamp_line1": "TOP SECRET",
+      "stamp_line2": "1974",
+      "forensic_header": "DECLASSIFIED DOSSIER \u2022 1974",
+      "forensic_lines": [
+        "DATE: 1974",
+        "SECTOR: PACIFIC OCEAN",
+        "RECORD: PROJECT AZORIAN WAS A U.S. CENTRAL"
+      ],
+      "split_left_label": "ARCHIVAL PLATE A",
+      "split_right_label": "DECLASSIFIED PLATE B",
+      "climax_stat_label": "VERIFIED RECORD \u2022 1974",
+      "climax_stat_big": "1,560",
+      "climax_stat_sub": "LOCATION: PACIFIC OCEAN",
+      "tags": [
+        "history",
+        "us history",
+        "history documentary",
+        "cold war",
+        "declassified",
+        "secret history",
+        "on this day",
+        "1974"
+      ],
+      "provider": "v15-deterministic-fallback"
+    }
+  }
+]
