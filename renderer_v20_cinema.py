@@ -919,8 +919,8 @@ def render_v20_cinema(ev, script, voice_dur, words, audio_m4a, env30, spec30, ou
         "-s", f"{W}x{H}", "-r", str(FPS), "-i", "pipe:0",
         "-i", audio_m4a,
         "-map", "0:v:0", "-map", "1:a:0",
-        "-c:v", "libx264", "-preset", "superfast", "-crf", "21", "-maxrate", "8M", "-bufsize", "12M",
-        "-pix_fmt", "yuv420p", "-c:a", "copy", "-movflags", "+faststart", "-shortest", out_mp4
+        "-c:v", "libx264", "-profile:v", "high", "-level:v", "4.1", "-preset", "superfast", "-crf", "21", "-maxrate", "8M", "-bufsize", "12M",
+        "-pix_fmt", "yuv420p", "-c:a", "copy", "-map_metadata", "-1", "-fflags", "+bitexact", "-movflags", "+faststart", "-shortest", out_mp4
     ], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=err_log)
 
     qa_snaps = {}
