@@ -229,7 +229,7 @@ def publish_to_buffer(channel_id, video_path, caption, delay_minutes):
         "schedulingType": "automatic",
         "mode": "customScheduled",
         "dueAt": due_iso,
-        "assets": [{"video": {"url": public_url, "metadata": {"thumbnailOffset": 100}}}],
+        "assets": [{"video": {"url": public_url, "metadata": {"thumbnailOffset": 0}}}],
     }
     mut = """
     mutation CreateTikTokPost($input: CreatePostInput!) {
@@ -280,24 +280,36 @@ def main():
             history_path=tt_hist_path,
             work_dir=sub_dir, channel_name=cfg["channel_name"],
         )
-        script = write_script_v20(ev)
-        video_clips = scout_real_videos_v20(ev, script, work_dir=sub_dir, vertical=True, target_clips=5, dur_sec=7.5)
+        # 🔥 TIKTOK CREATOR REWARDS MODE (>60s GUARANTEED + NUCLEAR 0-3s HOOK + RAZOR-SHARP FRAME-0 MINIATURE!)
+        script = write_script_v20(ev, target_mode="tiktok_rewards")
+        video_clips = scout_real_videos_v20(ev, script, work_dir=sub_dir, vertical=True, target_clips=7, dur_sec=9.0)
 
         voice_mp3 = os.path.join(sub_dir, "voice_tt.mp3")
         audio_m4a = os.path.join(sub_dir, "audio_tt.m4a")
         safe_id = "".join(c if c.isalnum() or c in "_-" else "_" for c in str(ev.get("id", f"ep_{idx}")))[:42]
+        raw_mp4 = os.path.join(sub_dir, f"BTC_TT_RAW_{now.strftime('%Y%m%d')}_{idx}_{safe_id}.mp4")
         out_mp4 = os.path.join(sub_dir, f"BTC_TT_{now.strftime('%Y%m%d')}_{idx}_{safe_id}.mp4")
 
+        speech_off = 0.45
+        MIN_REWARDS_DUR = 64.0  # Strictly > 60.0s for TikTok Creator Rewards (France/US) eligibility!
+        MAX_REWARDS_DUR = 84.0
         voice_dur, words = synthesize_voice_v15(
             script["narration"], voice_mp3,
-            voice=cfg["voice"], rate=cfg.get("voice_rate", "+4%"), pitch=cfg.get("voice_pitch", "-2Hz"),
+            voice=cfg["voice"], rate="+0%", pitch=cfg.get("voice_pitch", "-2Hz"),
         )
-        speech_off = 0.45
-        total_dur = min(59.0, round(speech_off + voice_dur + 4.55, 2))
+        # Auto-pace safeguard: if voice is ever slightly short, switch to deeper cinematic cadence so audio fills >=64s!
+        if (speech_off + voice_dur + 4.55) < MIN_REWARDS_DUR:
+            print(f"[BTC TIKTOK REWARDS] Initial est {speech_off + voice_dur + 4.55:.1f}s < {MIN_REWARDS_DUR}s -> re-voicing at -7% cinema pace...")
+            voice_dur, words = synthesize_voice_v15(
+                script["narration"], voice_mp3,
+                voice=cfg["voice"], rate="-7%", pitch=cfg.get("voice_pitch", "-2Hz"),
+            )
+        total_dur = max(MIN_REWARDS_DUR, min(MAX_REWARDS_DUR, round(speech_off + voice_dur + 4.55, 2)))
+        print(f"[BTC TIKTOK REWARDS] voice={voice_dur:.2f}s | target_total={total_dur:.2f}s (CREATOR REWARDS >60s ELIGIBLE!)")
         b = [0.0, 0.22, 0.44, 0.64, 0.82, 1.0]
         sfx_plan = [
-            (0.10, "braaam", 0.46, 0.50),
-            (total_dur * 0.10, "dive", 0.34, 0.50),
+            (0.14, "braaam", 0.48, 0.50),
+            (4.30, "dive", 0.36, 0.50),
             (total_dur * b[1] - 0.18, "whoosh", 0.36, 0.50),
             (total_dur * (b[1] + 0.15), "stamp", 0.44, 0.58),
             (total_dur * b[2] - 0.18, "whoosh", 0.36, 0.50),
@@ -305,18 +317,26 @@ def main():
             (total_dur * b[4] + 0.08, "braaam", 0.36, 0.50),
         ]
         env30, spec30 = mix_cinema_audio_v15(voice_mp3, total_dur, speech_off, audio_m4a, seed=ev["year"] * 19 + idx, sfx_plan=sfx_plan)
-        render_v20_cinema(
+        rendered_dur = render_v20_cinema(
             ev, script, voice_dur, words, audio_m4a, env30, spec30,
-            out_mp4, video_clips=video_clips, vertical=True, qa_out=None,
+            raw_mp4, video_clips=video_clips, vertical=True, qa_out=None,
             show_outro=True, show_midroll_ad=True,
+            max_dur=MAX_REWARDS_DUR, min_dur=MIN_REWARDS_DUR,
         )
+        # Strip FFmpeg encoder metadata tags (-map_metadata -1) so TikTok receives a 100% clean organic MP4!
+        subprocess.run([
+            "ffmpeg", "-y", "-i", raw_mp4, "-c", "copy",
+            "-map_metadata", "-1", "-fflags", "+bitexact", "-movflags", "+faststart",
+            out_mp4,
+        ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print(f"[BTC TIKTOK REWARDS] Final clean MP4 ready: {out_mp4} ({rendered_dur:.2f}s | {os.path.getsize(out_mp4)/1e6:.2f} MB)")
 
         caption = build_btc_tiktok_caption(ev, script)
         elapsed_m = int((time.time() - t_start) // 60)
         eff_delay = max(15, delays[idx - 1] - elapsed_m)
 
         if dry:
-            print(f"[DRY-RUN {idx}/{n_batch}] Rendered {out_mp4} ({os.path.getsize(out_mp4)/1e6:.2f} MB) | delay=+{eff_delay}m")
+            print(f"[DRY-RUN {idx}/{n_batch}] Rendered {out_mp4} ({rendered_dur:.2f}s | {os.path.getsize(out_mp4)/1e6:.2f} MB | REWARDS >60s OK) | delay=+{eff_delay}m")
             print(f"[DRY-RUN CAPTION]\n{caption}")
             continue
 
@@ -327,7 +347,7 @@ def main():
         hist.append({"id": ev["id"], "date": now.strftime("%Y-%m-%d"), "title": script["title"], "buffer_post_id": pid})
         json.dump(hist[-5000:], open(tt_hist_path, "w"), indent=2)
 
-        send_telegram(f"🎵🔴 <b>BEHIND THE CURTAIN — TikTok {idx}/{n_batch} Scheduled!</b>\n⏰ {due_iso}\n{caption}")
+        send_telegram(f"🎵🔴 <b>BEHIND THE CURTAIN — TikTok Rewards ({rendered_dur:.0f}s) {idx}/{n_batch} Scheduled!</b>\n⏰ {due_iso}\n{caption}")
         if idx < n_batch:
             time.sleep(5)
 

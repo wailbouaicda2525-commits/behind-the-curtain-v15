@@ -71,6 +71,64 @@ STRICT VIRAL HOOK RULES (FIRST 8 WORDS DECIDE 80% OF VIEWS!):
 }"""
 
 
+
+
+SYSTEM_PROMPT_TIKTOK_REWARDS_V21 = """You are the lead viral documentary showrunner writing 65-to-75 second TikTok Creator Rewards scripts for a high-RPM English (US/UK/EU) history audience (Johnny Harris x LEMMiNO x Netflix Cold War style).
+Given a verified historical event, write an electrifying 62-to-70 second spoken documentary narration (STRICTLY 175 to 198 words — NEVER under 168 words so the final video stays cleanly over 61 seconds for TikTok Creator Rewards!) strictly grounded in the provided facts, PLUS exact real-video search queries AND high-CTR Frame-0 Miniature + 0-3s Hook synergy.
+
+STRICT VIRAL MINIATURE + HOOK + RETENTION RULES (THE FIRST 3 SECONDS DECIDE 85% OF VIEWS!):
+1. NEVER start with dead clichés like "On this day", "For decades", "In history", "Welcome", "Did you know", "Today", "A single turning point", or "Have you ever wondered".
+2. OPEN INSIDE PEAK TENSION in the VERY FIRST 8 WORDS using one of these 5 scroll-stopping viral formulas:
+   - Countdown/Clock Stake: "Three seconds from nuclear war, one Russian officer refused the firing order."
+   - Impossible Secret/Price Tag: "The CIA spent $350 million building a fake ship just to steal a sunken Soviet submarine."
+   - Fatal 1-Second Mistake: "A single unlocked door in 1972 brought down the most powerful president on Earth."
+   - Buried Evidence Paradox: "For forty years, officials called this photo a hoax — until the vault opened."
+   - Shocking Scale/Survival: "One secret tunnel under Berlin let spies listen to every Soviet phone call for eleven months."
+3. FRAME-0 MINIATURE + HOOK SYNERGY: The Frame-0 Miniature headline (`thumb_white` + `thumb_red`) MUST be 2-4 MASSIVE punchy words total that create an instant curiosity gap when paired with `hook_teaser` (an open-loop shock line) and your opening spoken sentence!
+4. MID-VIDEO RETENTION RE-HOOK (~word 70-90): Include a sharp twist/escalation right in the middle ("Wait — what the declassified memo revealed next was even wilder..." or "But inside the locked briefing room, one hidden detail changed everything.") to hold viewers past the 30-second retention wall!
+5. ENDING COMMENT-BAIT TWIST (~final 18 words): End with a sharp human dilemma or debate question (NEVER say "Subscribe" — this is TikTok!) that sparks comments.
+6. Plain spoken American English ONLY (no emojis, no hashtags, no stage directions, no brackets).
+7. Return ONLY valid JSON with these exact keys:
+{
+  "title": "High-CTR title <= 66 chars (curiosity gap, complete words, NO #Shorts)",
+  "hook_top": "2-3 WORD GIANT COLD-OPEN HOOK (ALL CAPS, e.g. 'FIVE MINUTES TO WW3')",
+  "hook_sub": "SHORT CONTEXT LINE <= 32 chars (ALL CAPS, e.g. 'OCT 27, 1962 • CUBAN BLOCKADE')",
+  "hook_teaser": "GRIPPING CURIOSITY OPEN-LOOP LINE <= 40 chars (ALL CAPS, e.g. 'BURIED IN CIA VAULTS FOR 40 YEARS')",
+  "newspaper_headline": "DRAMATIC 4-6 WORD VINTAGE NEWSPAPER HEADLINE (ALL CAPS)",
+  "thumb_hook": "2-3 GIANT ALL-CAPS MINIATURE WORDS (e.g. 'ONE MAN STOPPED WW3')",
+  "thumb_white": "1-3 SHORT WHITE WORDS FOR MINIATURE <= 16 chars (ALL CAPS, e.g. 'THE CIA STOLE A' or '3 SECONDS TO')",
+  "thumb_red": "1-2 EXPLOSIVE POWER WORDS <= 13 chars (ALL CAPS, e.g. 'SOVIET SUB' or 'WW3')",
+  "thumb_stamp": "SHORT RED RUBBER STAMP BADGE <= 16 chars (ALL CAPS, e.g. 'CIA ARCHIVE' or 'DECLASSIFIED')",
+  "thumb_pill": "SHORT YEAR/ERA TAG <= 14 chars (e.g. '1968 -> 1974' or 'OCT 1962')",
+  "narration": "STRICTLY 175-198 word gripping factual Cold War documentary narration in plain English (brutal 0-3s hook, mid-story twist at ~80 words, debate-sparking ending, natural ~66s spoken duration).",
+  "polaroid_caption": "Short archival evidence caption <= 42 chars (ALL CAPS)",
+  "stamp_line1": "1-2 WORD RED STAMP (ALL CAPS, e.g. 'DECLASSIFIED' or 'TOP SECRET')",
+  "stamp_line2": "SHORT SUB-STAMP <= 22 chars (ALL CAPS)",
+  "forensic_header": "CLASSIFIED DOSSIER HEADER <= 38 chars (ALL CAPS)",
+  "forensic_lines": [
+    "LINE 1: Verified date/codename fact <= 42 chars",
+    "LINE 2: Verified location/turning point <= 42 chars",
+    "LINE 3: Verified shocking aftermath <= 42 chars"
+  ],
+  "split_left_label": "SHORT LABEL <= 18 chars (ALL CAPS, e.g. 'ARCHIVAL FILM')",
+  "split_right_label": "SHORT LABEL <= 18 chars (ALL CAPS, e.g. 'DECLASSIFIED FILE')",
+  "climax_stat_label": "SHORT EYEBROW <= 26 chars (ALL CAPS)",
+  "climax_stat_big": "BOLD NUMBER OR YEAR <= 18 chars (ALL CAPS)",
+  "climax_stat_sub": "IMPACT CONTEXT <= 38 chars (ALL CAPS)",
+  "video_queries_broll": [
+    "1-2 concrete visual nouns for Pixabay video (NEVER use 'close up', e.g. 'submarine underwater')",
+    "1-2 concrete visual nouns for tension (e.g. 'radar military' or 'ocean storm')",
+    "1-2 concrete visual nouns for investigation (e.g. 'typewriter document' or 'map compass')",
+    "1-2 concrete visual nouns for climax (e.g. 'battleship sea' or 'rocket launch')"
+  ],
+  "video_queries_archival": [
+    "2-3 word historical film query for Internet Archive / NARA (e.g. 'cold war submarine')",
+    "2-3 word historical film query (e.g. 'atomic missile navy')"
+  ],
+  "tags": ["history", "cold war", "declassified", "secret history", "espionage", "3-5 topic tags"]
+}"""
+
+
 def _extract_json(raw_text):
     txt = re.sub(r"<think>[\s\S]*?</think>", "", str(raw_text or ""), flags=re.I).strip()
     m = re.search(r"\{[\s\S]*\}", txt)
@@ -173,7 +231,7 @@ def _call_gemini_v20(prompt, api_key, sys_prompt=SYSTEM_PROMPT_V20):
     return None, None
 
 
-def _deterministic_v20_fallback(ev):
+def _deterministic_v20_fallback(ev, tiktok_rewards=False):
     cname = ev.get("channel_name", "HISTORY UNSEALED")
     is_btc = (ev.get("mode") == "behind_the_curtain")
     summary = re.sub(r"\([^)]*\)", "", ev["summary"]).strip()
@@ -189,30 +247,45 @@ def _deterministic_v20_fallback(ev):
             s = re.sub(r"\s+", " ", s)
             if 48 <= len(s) <= 175 and s[:36].lower() not in summary.lower():
                 extra_sents.append(s)
-            if len(extra_sents) >= 2:
+            max_ex = 5 if tiktok_rewards else 2
+            if len(extra_sents) >= max_ex:
                 break
-        if len(extra_sents) >= 2:
+        if len(extra_sents) >= (5 if tiktok_rewards else 2):
             break
 
     extra_txt = " ".join(extra_sents)
-    if is_btc:
+    if tiktok_rewards:
         narration = (
-            f"In {ev['year']}, one classified mission over {ev['location'].title()} was buried so deep even presidents weren't told the full truth. "
+            f"One classified dossier from {ev['year']} in {ev['location'].title()} stayed sealed for decades because even senior leaders feared what the public would do if it leaked. "
             f"{summary} {extra_txt} "
-            f"Satellite coordinates reveal how razor-thin the margin was between quiet survival and global disaster. "
-            f"When the vault finally opened, historians realized the official story was only half the picture. "
-            f"Subscribe to {cname.title()} for tomorrow's declassified file."
+            f"Wait — what investigators uncovered inside the declassified cables years later made the cover-up even darker. "
+            f"Every move was tracked in total silence while ordinary citizens had no idea how dangerously close the superpower standoff came to spinning completely out of control. "
+            f"Maps, intercepted transcripts, and eyewitness testimony prove the margin between quiet survival and global catastrophe was measured in minutes, not days. "
+            f"When the vault finally opened, historians realized the official press briefing had left out the single most critical turning point of the entire operation. "
+            f"Be honest — if you were sitting inside that briefing room in {ev['year']}, would you have revealed the truth or kept the file locked?"
         )
+        words = narration.split()
+        if len(words) > 202:
+            narration = " ".join(words[:198]).rstrip(",;:") + "."
     else:
-        narration = (
-            f"One split-second decision in {ev['location'].title()} during {ev['year']} changed history forever — and almost nobody remembers how close it came to failing. "
-            f"{summary} {extra_txt} "
-            f"Textbooks bury this moment in a single quiet paragraph, yet the real archival record is far more intense. "
-            f"Subscribe to {cname.title()} for tomorrow's unsealed file."
-        )
-    words = narration.split()
-    if len(words) > 136:
-        narration = " ".join(words[:132]).rstrip(",;:") + "."
+        if is_btc:
+            narration = (
+                f"In {ev['year']}, one classified mission over {ev['location'].title()} was buried so deep even presidents weren't told the full truth. "
+                f"{summary} {extra_txt} "
+                f"Satellite coordinates reveal how razor-thin the margin was between quiet survival and global disaster. "
+                f"When the vault finally opened, historians realized the official story was only half the picture. "
+                f"Subscribe to {cname.title()} for tomorrow's declassified file."
+            )
+        else:
+            narration = (
+                f"One split-second decision in {ev['location'].title()} during {ev['year']} changed history forever — and almost nobody remembers how close it came to failing. "
+                f"{summary} {extra_txt} "
+                f"Textbooks bury this moment in a single quiet paragraph, yet the real archival record is far more intense. "
+                f"Subscribe to {cname.title()} for tomorrow's unsealed file."
+            )
+        words = narration.split()
+        if len(words) > 136:
+            narration = " ".join(words[:132]).rstrip(",;:") + "."
 
     short_t = re.sub(r"\([^)]*\)", "", ev.get("title") or ev.get("hook_hint") or ev["summary"][:60]).strip()
     raw_fb_title = f"{ev['year']}: The Untold Truth Behind {short_t}"
@@ -250,17 +323,24 @@ def _deterministic_v20_fallback(ev):
     }
 
 
-def write_script_v20(ev):
-    """Master V20 Showrunner: Groq 2026 Live -> Gemini -> Zero-Fail Fallback."""
+def write_script_v20(ev, target_mode="short"):
+    """Master V20 Showrunner: Groq 2026 Live -> Gemini -> Zero-Fail Fallback.
+    target_mode:
+      - 'short'          -> 42-49s YouTube Shorts (110-124 words)
+      - 'tiktok_rewards' -> 64-75s TikTok Creator Rewards (175-198 words, >60s guaranteed!)
+    """
+    is_tt_rewards = (str(target_mode).lower() == "tiktok_rewards")
+    sys_p = SYSTEM_PROMPT_TIKTOK_REWARDS_V21 if is_tt_rewards else SYSTEM_PROMPT_V20
     ev_title = ev.get("title") or ev.get("hook_hint") or ev.get("summary", "")[:80]
     prompt = (
         f"CHANNEL: {ev.get('channel_name', 'HISTORY UNSEALED')}\n"
         f"MODE: {ev.get('mode', 'daily_archive')}\n"
+        f"TARGET_FORMAT: {'TIKTOK CREATOR REWARDS (65-75s / 175-198 words STRICTLY OVER 1 MINUTE)' if is_tt_rewards else 'YOUTUBE SHORTS (45s / 110-124 words)'}\n"
         f"EVENT TITLE: {ev_title}\n"
         f"DATE: {ev.get('date_label', ev['display_date'])} (Year {ev['year']})\n"
         f"LOCATION: {ev['location']} ({ev['lat']}, {ev['lon']})\n"
         f"VERIFIED SUMMARY: {ev['summary']}\n"
-        f"ADDITIONAL VERIFIED FACTS:\n{ev.get('extracts', '')[:2600]}"
+        f"ADDITIONAL VERIFIED FACTS:\n{ev.get('extracts', '')[:3400 if is_tt_rewards else 2600]}"
     )
 
     out, src = None, None
@@ -269,16 +349,16 @@ def write_script_v20(ev):
 
     # 1) GROQ FIRST (verified blazing fast 2026 live models!)
     if groq_key:
-        out, src = _call_groq_v20(prompt, groq_key)
+        out, src = _call_groq_v20(prompt, groq_key, sys_prompt=sys_p, max_tokens=2100 if is_tt_rewards else 1600)
     # 2) GEMINI SECOND
     if not out and gem_key:
-        out, src = _call_gemini_v20(prompt, gem_key)
+        out, src = _call_gemini_v20(prompt, gem_key, sys_prompt=sys_p)
     # 3) FALLBACK
     if not out:
-        out = _deterministic_v20_fallback(ev)
+        out = _deterministic_v20_fallback(ev, tiktok_rewards=is_tt_rewards)
         src = "v20-deterministic-fallback"
 
-    fb = _deterministic_v20_fallback(ev)
+    fb = _deterministic_v20_fallback(ev, tiktok_rewards=is_tt_rewards)
     for k, v in fb.items():
         if not out.get(k):
             out[k] = v
@@ -317,13 +397,24 @@ def write_script_v20(ev):
     out["climax_stat_sub"] = _trim_words(out["climax_stat_sub"], 38).upper()
     out["narration"] = re.sub(r"\[[^\]]*\]|\([^)]*\)", "", str(out["narration"])).strip()
     out["narration"] = re.sub(r"\s+", " ", out["narration"])
-    # Ensure narration fits cleanly inside ~45-49s so the 4.2s 3D Book Collector Outro NEVER gets clipped!
+    # Ensure narration fits cleanly inside target window (YouTube Shorts <=122w | TikTok Rewards 168-206w >60s!)
     n_words = out["narration"].split()
-    if len(n_words) > 122:
-        # Cut cleanly at last sentence boundary <= 122 words
-        clipped = " ".join(n_words[:122])
+    max_w = 206 if is_tt_rewards else 122
+    if is_tt_rewards and len(n_words) < 162:
+        # Never allow a TikTok Creator Rewards script to fall under 1 minute!
+        extra_add = (
+            f" Yet the most unsettling part was buried in the final declassified annex from {ev['year']}. "
+            f"Analysts concluded that one different order inside that room would have rewritten the entire Cold War overnight. "
+            f"If you had been the officer holding that classified file, would you have leaked it to the world or kept it sealed?"
+        )
+        out["narration"] = (out["narration"].rstrip() + extra_add).strip()
+        n_words = out["narration"].split()
+    if len(n_words) > max_w:
+        # Cut cleanly at last sentence boundary <= max_w words
+        clipped = " ".join(n_words[:max_w])
         last_dot = max(clipped.rfind("."), clipped.rfind("!"), clipped.rfind("?"))
-        out["narration"] = clipped[:last_dot + 1] if last_dot > 350 else (clipped.rstrip(",;:") + ".")
+        min_dot = 650 if is_tt_rewards else 350
+        out["narration"] = clipped[:last_dot + 1] if last_dot > min_dot else (clipped.rstrip(",;:") + ".")
     out["source"] = src
     print(f"[SCRIPT-V20] Generated via {src} | words={len(out['narration'].split())} | title={out['title']}")
     return out

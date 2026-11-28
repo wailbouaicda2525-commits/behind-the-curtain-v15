@@ -361,9 +361,11 @@ class SubCacheV20:
 
 
 def render_v20_cinema(ev, script, voice_dur, words, audio_m4a, env30, spec30, out_mp4,
-                      video_clips=None, vertical=True, qa_out=None, show_outro=True, show_midroll_ad=True):
+                      video_clips=None, vertical=True, qa_out=None, show_outro=True, show_midroll_ad=True,
+                      max_dur=59.0, min_dur=0.0):
     """
     V20 CINEMA BEAST RENDERER — Real Moving Video Footage + Johnny Harris Highlights + 3D Book Promo Outro!
+    max_dur=59.0 keeps YouTube Shorts strictly under 60s; pass max_dur=84.0, min_dur=63.5 for TikTok Creator Rewards (>1m)!
     """
     W, H = (1080, 1920) if vertical else (1920, 1080)
     FPS = 30 if vertical else 24
@@ -371,7 +373,10 @@ def render_v20_cinema(ev, script, voice_dur, words, audio_m4a, env30, spec30, ou
     outro_len = 4.2 if show_outro else 0.0
     raw_d = speech_off + voice_dur + (outro_len + 0.35 if show_outro else 1.2)
     if vertical:
-        raw_d = min(59.0, raw_d)
+        if max_dur and max_dur > 0:
+            raw_d = min(float(max_dur), raw_d)
+        if min_dur and min_dur > 0:
+            raw_d = max(float(min_dur), raw_d)
     n_frames = int(round(raw_d * FPS))
     total_dur = n_frames / float(FPS)
     brand = ev.get("channel_name", "BEHIND THE CURTAIN").upper()
@@ -597,24 +602,26 @@ def render_v20_cinema(ev, script, voice_dur, words, audio_m4a, env30, spec30, ou
             #  0..45% -> INSTANT FRAME-0 VIRAL VISUAL HOOK + MOVING B-ROLL + IMPACT SLAM + FLARE SWEEP!
             #  45..70% -> 3D Earth Globe Orbital Drop
             #  70..100% -> Dark Esri Tactical Map + Live Radar + Animated Glowing Mission Vector Arc!
-            if p < 0.45:
-                q = p / 0.45
+            # Keep Frame-0 Hook Card crisp & punchy (~4.2s max even on >60s TikTok Rewards videos!)
+            hook_p_end = min(0.45, 4.35 / max(1.0, total_dur * 0.22)) if (vertical and total_dur > 60.0) else 0.45
+            if p < hook_p_end:
+                q = p / max(0.05, hook_p_end)
                 fr, meta = get_real_video_or_photo(b0, fi, q, darken=0.72, micro_zoom=0.07)
                 if meta.get("is_archival"):
                     fr = draw_archival_film_overlay(fr, vertical=vertical)
-                # Frame-0 (t < 0.08s) is 100% CRISP & VISIBLE (alpha=1.0, scale=1.0) so YouTube Shorts
-                # auto-frame picker ALWAYS captures a viral cover miniature! Then smooth punch-in & exit!
-                if t < 0.08:
+                # Frame-0..140ms is 100% ROCK-STEADY CRISP (alpha=1.0, scale=1.0, ZERO camera shake) so
+                # BOTH YouTube Shorts & TikTok Buffer (thumbnailOffset=0..100ms) lock a razor-sharp miniature!
+                if t < 0.14:
                     pa = 1.0
                     sc_k = 1.0
                 else:
                     exit_fade = ease_out(min(1.0, (1.0 - q) / 0.16))
                     pa = exit_fade
                     # Subtle kinetic breathing zoom during hook hold
-                    punch = 0.055 * math.sin(min(1.0, (t - 0.08) / 0.24) * math.pi)
+                    punch = 0.055 * math.sin(min(1.0, (t - 0.14) / 0.24) * math.pi)
                     sc_k = 1.0 + punch + 0.025 * q
-                if 0.08 <= t < 0.34:
-                    dt = t - 0.08; amp = 14.0 * math.exp(-dt / 0.07)
+                if 0.14 <= t < 0.40:
+                    dt = t - 0.14; amp = 14.0 * math.exp(-dt / 0.07)
                     fr = cv2.warpAffine(fr, np.float32([[1, 0, amp * math.sin(dt * 120)], [0, 1, amp * math.cos(dt * 95)]]), (W, H))
                 cy_hook = H * (0.435 if vertical else 0.495)
                 fr = comp_pil(fr, hook_card_v21, W / 2.0, cy_hook, scale=sc_k, alpha=pa)
@@ -631,7 +638,7 @@ def render_v20_cinema(ev, script, voice_dur, words, audio_m4a, env30, spec30, ou
                 return fr
             elif p < 0.70:
                 # 3D REAL SATELLITE EARTH ORBITAL DROP (vivid Esri Satellite Globe + blue atmospheric Fresnel glow!)
-                q = (p - 0.45) / 0.25
+                q = (p - hook_p_end) / max(0.10, 0.70 - hook_p_end)
                 rot_x = (1.0 - ease_io(q)) * 175.0
                 tex = cv2.remap(map_mac, g_mx - rot_x, g_my, cv2.INTER_LINEAR, borderMode=cv2.BORDER_WRAP)
                 sun_shade = np.clip(g_shade * 1.18 + 0.10, 0.0, 1.18)
